@@ -1,0 +1,386 @@
+{
+  "info": {
+    "name": "Portal de Revistas API",
+    "description": "Coleção completa de endpoints da API do Portal de Revistas",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"João Silva\",\n  \"email\": \"joao@example.com\",\n  \"password\": \"senha123\",\n  \"role\": \"reader\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"joao@example.com\",\n  \"password\": \"senha123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Publishers",
+      "item": [
+        {
+          "name": "Get All Publishers",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/publishers",
+              "host": ["{{base_url}}"],
+              "path": ["api", "publishers"]
+            }
+          }
+        },
+        {
+          "name": "Get Publisher by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/publishers/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "publishers", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Publisher",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Marvel Comics\",\n  \"description\": \"Uma das maiores editoras de quadrinhos do mundo\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/publishers",
+              "host": ["{{base_url}}"],
+              "path": ["api", "publishers"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Titles",
+      "item": [
+        {
+          "name": "Get All Titles",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/titles",
+              "host": ["{{base_url}}"],
+              "path": ["api", "titles"]
+            }
+          }
+        },
+        {
+          "name": "Get Titles by Publisher",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/titles?publisher_id=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "titles"],
+              "query": [
+                {
+                  "key": "publisher_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Title",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"publisher_id\": 1,\n  \"name\": \"X-Men\",\n  \"description\": \"Os mutantes mais poderosos da Marvel\",\n  \"genre\": \"Super-herói\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/titles",
+              "host": ["{{base_url}}"],
+              "path": ["api", "titles"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Issues",
+      "item": [
+        {
+          "name": "Get All Issues",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/issues",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues"]
+            }
+          }
+        },
+        {
+          "name": "Search Issues",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/issues/search?q=x-men",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "x-men"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Issue by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/issues/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Issue",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title_id\": 1,\n  \"issue_number\": \"#150\",\n  \"publication_year\": 2024,\n  \"description\": \"Edição especial dos X-Men\",\n  \"cover_image_url\": \"http://example.com/cover.jpg\",\n  \"pdf_file_url\": \"http://example.com/issue.pdf\",\n  \"page_count\": 32,\n  \"author\": \"Jonathan Hickman\",\n  \"artist\": \"Pepe Larraz\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/issues",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ratings & Comments",
+      "item": [
+        {
+          "name": "Rate Issue",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"value\": 5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/issues/1/rate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues", "1", "rate"]
+            }
+          }
+        },
+        {
+          "name": "Add Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Edição incrível! A arte está espetacular.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/issues/1/comments",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues", "1", "comments"]
+            }
+          }
+        },
+        {
+          "name": "Get Issue Comments",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/issues/1/comments",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues", "1", "comments"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Favorites",
+      "item": [
+        {
+          "name": "Get My Favorites",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/favorites",
+              "host": ["{{base_url}}"],
+              "path": ["api", "favorites"]
+            }
+          }
+        },
+        {
+          "name": "Add to Favorites",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/favorites/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "favorites", "1"]
+            }
+          }
+        },
+        {
+          "name": "Remove from Favorites",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/favorites/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "favorites", "1"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
