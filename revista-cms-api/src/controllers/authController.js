@@ -7,12 +7,8 @@ const pool = require('../config/database');
  */
 const register = async (req, res, next) => {
   try {
-    const { name, email, password, role = 'reader' } = req.body;
-
-    // Validações básicas
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: 'Nome, email e senha são obrigatórios' });
-    }
+    const { name, email, password } = req.body;
+    // Validações são feitas pelo middleware validators.js
 
     // Verificar se o email já está cadastrado
     const existingUser = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
@@ -20,8 +16,13 @@ const register = async (req, res, next) => {
       return res.status(409).json({ error: 'Email já cadastrado' });
     }
 
-    // Hash da senha
-    const passwordHash = await bcrypt.hash(password, 10);
+    // SEGURANÇA: Sempre forçar role 'reader' no registro público
+    // Admins e editores devem ser criados por um admin existente
+    const role = 'reader';
+
+    // Hash da senha com salt rounds configurável
+    const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS) || 12;
+    const passwordHash = await bcrypt.hash(password, saltRounds);
 
     // Inserir o novo usuário
     const result = await pool.query(
@@ -52,11 +53,7 @@ const register = async (req, res, next) => {
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-
-    // Validações básicas
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email e senha são obrigatórios' });
-    }
+    // Validações são feitas pelo middleware validators.js
 
     // Buscar o usuário pelo email
     const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);

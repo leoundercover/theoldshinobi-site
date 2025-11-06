@@ -102,10 +102,16 @@ CREATE INDEX idx_issues_publication_year ON issues(publication_year);
 CREATE INDEX idx_comments_issue_id ON comments(issue_id);
 CREATE INDEX idx_ratings_issue_id ON ratings(issue_id);
 
--- Inserir dados de exemplo
--- Usuário admin (senha: admin123)
-INSERT INTO users (name, email, password_hash, role) 
-VALUES ('Administrador', 'admin@revista.com', '$2a$10$YourHashedPasswordHere', 'admin');
+-- ============================================
+-- DADOS DE EXEMPLO
+-- ============================================
+
+-- IMPORTANTE: O usuário admin deve ser criado manualmente via script separado
+-- ou via endpoint administrativo após a primeira instalação
+-- Nunca commite credenciais reais no repositório
+
+-- Para criar o primeiro admin, execute o script create-admin.js após iniciar o servidor
+-- ou use: POST /api/auth/register seguido de UPDATE manual no banco para mudar role para 'admin'
 
 -- Editoras de exemplo
 INSERT INTO publishers (name, description) VALUES
