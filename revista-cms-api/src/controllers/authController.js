@@ -1,46 +1,22 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const pool = require('../config/database');
+const AuthService = require('../services/AuthService');
+const ResponseDTO = require('../dtos/ResponseDTO');
+
+/**
+ * Controller de Autenticação
+ * Responsabilidade: Receber requisições HTTP, chamar services, retornar respostas
+ */
 
 /**
  * Registrar um novo usuário
  */
 const register = async (req, res, next) => {
   try {
-    const { name, email, password, role = 'reader' } = req.body;
+    const { name, email, password } = req.body;
 
-    // Validações básicas
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: 'Nome, email e senha são obrigatórios' });
-    }
+    const user = await AuthService.register({ name, email, password });
 
-    // Verificar se o email já está cadastrado
-    const existingUser = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
-    if (existingUser.rows.length > 0) {
-      return res.status(409).json({ error: 'Email já cadastrado' });
-    }
-
-    // Hash da senha
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    // Inserir o novo usuário
-    const result = await pool.query(
-      'INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role, created_at',
-      [name, email, passwordHash, role]
-    );
-
-    const user = result.rows[0];
-
-    res.status(201).json({
-      message: 'Usuário registrado com sucesso',
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        created_at: user.created_at,
-      },
-    });
+    const response = ResponseDTO.created(user, 'Usuário registrado com sucesso');
+    res.status(201).json(response);
   } catch (error) {
     next(error);
   }
@@ -53,42 +29,10 @@ const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    // Validações básicas
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email e senha são obrigatórios' });
-    }
+    const authData = await AuthService.login({ email, password });
 
-    // Buscar o usuário pelo email
-    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (result.rows.length === 0) {
-      return res.status(401).json({ error: 'Credenciais inválidas' });
-    }
-
-    const user = result.rows[0];
-
-    // Verificar a senha
-    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
-    if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Credenciais inválidas' });
-    }
-
-    // Gerar o token JWT
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
-    );
-
-    res.json({
-      message: 'Login realizado com sucesso',
-      token,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
-    });
+    const response = ResponseDTO.success(authData, 'Login realizado com sucesso');
+    res.json(response);
   } catch (error) {
     next(error);
   }
@@ -101,19 +45,53 @@ const getMe = async (req, res, next) => {
   try {
     const userId = req.user.id;
 
-    const result = await pool.query(
-      'SELECT id, name, email, role, created_at FROM users WHERE id = $1',
-      [userId]
-    );
+    const user = await AuthService.getAuthenticatedUser(userId);
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Usuário não encontrado' });
-    }
-
-    res.json({ user: result.rows[0] });
+    const response = ResponseDTO.success(user);
+    res.json(response);
   } catch (error) {
     next(error);
   }
 };
 
-module.exports = { register, login, getMe };
+/**
+ * Atualizar perfil do usuário autenticado
+ */
+const updateProfile = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const updateData = req.body;
+
+    const user = await AuthService.updateProfile(userId, updateData);
+
+    const response = ResponseDTO.updated(user, 'Perfil atualizado com sucesso');
+    res.json(response);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Alterar senha do usuário autenticado
+ */
+const changePassword = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { currentPassword, newPassword } = req.body;
+
+    const result = await AuthService.changePassword(userId, currentPassword, newPassword);
+
+    const response = ResponseDTO.success(null, result.message);
+    res.json(response);
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  register,
+  login,
+  getMe,
+  updateProfile,
+  changePassword
+};

@@ -1,50 +1,29 @@
-const pool = require('../config/database');
+const IssueService = require('../services/IssueService');
+const ResponseDTO = require('../dtos/ResponseDTO');
 
 /**
- * Listar todas as edições (com filtros opcionais)
+ * Controller de Issues (Edições)
+ * Responsabilidade: Receber requisições HTTP, chamar services, retornar respostas
+ */
+
+/**
+ * Listar todas as edições (com filtros opcionais e paginação)
  */
 const getAllIssues = async (req, res, next) => {
   try {
-    const { title_id, publication_year, limit = 20, offset = 0 } = req.query;
+    const { title_id, publication_year, page, limit } = req.query;
 
-    let query = `
-      SELECT i.*, t.name as title_name, p.name as publisher_name,
-             COALESCE(AVG(r.value), 0) as average_rating,
-             COUNT(DISTINCT r.id) as rating_count
-      FROM issues i
-      JOIN titles t ON i.title_id = t.id
-      JOIN publishers p ON t.publisher_id = p.id
-      LEFT JOIN ratings r ON i.id = r.issue_id
-    `;
+    const filters = {
+      titleId: title_id,
+      publicationYear: publication_year
+    };
 
-    const params = [];
-    const conditions = [];
+    const paginationParams = { page, limit };
 
-    if (title_id) {
-      conditions.push(`i.title_id = $${params.length + 1}`);
-      params.push(title_id);
-    }
+    const result = await IssueService.getAllIssues(filters, paginationParams);
 
-    if (publication_year) {
-      conditions.push(`i.publication_year = $${params.length + 1}`);
-      params.push(publication_year);
-    }
-
-    if (conditions.length > 0) {
-      query += ' WHERE ' + conditions.join(' AND ');
-    }
-
-    query += ` 
-      GROUP BY i.id, t.name, p.name
-      ORDER BY i.publication_year DESC, i.issue_number DESC
-      LIMIT $${params.length + 1} OFFSET $${params.length + 2}
-    `;
-
-    params.push(limit, offset);
-
-    const result = await pool.query(query, params);
-
-    res.json({ issues: result.rows });
+    const response = ResponseDTO.paginated(result.data, result.pagination);
+    res.json(response);
   } catch (error) {
     next(error);
   }
@@ -57,44 +36,10 @@ const getIssueById = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    // Buscar a edição com informações agregadas
-    const issueResult = await pool.query(
-      `SELECT i.*, t.name as title_name, t.genre, p.name as publisher_name,
-              COALESCE(AVG(r.value), 0) as average_rating,
-              COUNT(DISTINCT r.id) as rating_count
-       FROM issues i
-       JOIN titles t ON i.title_id = t.id
-       JOIN publishers p ON t.publisher_id = p.id
-       LEFT JOIN ratings r ON i.id = r.issue_id
-       WHERE i.id = $1
-       GROUP BY i.id, t.name, t.genre, p.name`,
-      [id]
-    );
+    const result = await IssueService.getIssueById(id);
 
-    if (issueResult.rows.length === 0) {
-      return res.status(404).json({ error: 'Edição não encontrada' });
-    }
-
-    const issue = issueResult.rows[0];
-
-    // Buscar títulos similares (mesmo gênero ou mesma série)
-    const similarResult = await pool.query(
-      `SELECT i.id, i.issue_number, i.cover_image_url, t.name as title_name,
-              COALESCE(AVG(r.value), 0) as average_rating
-       FROM issues i
-       JOIN titles t ON i.title_id = t.id
-       LEFT JOIN ratings r ON i.id = r.issue_id
-       WHERE (t.genre = $1 OR t.id = $2) AND i.id != $3
-       GROUP BY i.id, t.name
-       ORDER BY RANDOM()
-       LIMIT 4`,
-      [issue.genre, issue.title_id, id]
-    );
-
-    res.json({
-      issue,
-      similar_issues: similarResult.rows,
-    });
+    const response = ResponseDTO.success(result);
+    res.json(response);
   } catch (error) {
     next(error);
   }
@@ -114,44 +59,26 @@ const createIssue = async (req, res, next) => {
       pdf_file_url,
       page_count,
       author,
-      artist,
+      artist
     } = req.body;
 
-    if (!title_id || !issue_number || !cover_image_url || !pdf_file_url) {
-      return res.status(400).json({
-        error: 'ID do título, número da edição, capa e PDF são obrigatórios',
-      });
-    }
+    const issueData = {
+      titleId: title_id,
+      issueNumber: issue_number,
+      publicationYear: publication_year,
+      description,
+      coverImageUrl: cover_image_url,
+      pdfFileUrl: pdf_file_url,
+      pageCount: page_count,
+      author,
+      artist
+    };
 
-    const result = await pool.query(
-      `INSERT INTO issues 
-       (title_id, issue_number, publication_year, description, cover_image_url, pdf_file_url, page_count, author, artist) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
-       RETURNING *`,
-      [
-        title_id,
-        issue_number,
-        publication_year,
-        description,
-        cover_image_url,
-        pdf_file_url,
-        page_count,
-        author,
-        artist,
-      ]
-    );
+    const issue = await IssueService.createIssue(issueData);
 
-    res.status(201).json({
-      message: 'Edição criada com sucesso',
-      issue: result.rows[0],
-    });
+    const response = ResponseDTO.created(issue, 'Edição criada com sucesso');
+    res.status(201).json(response);
   } catch (error) {
-    if (error.code === '23505') {
-      return res.status(409).json({ error: 'Esta edição já existe para este título' });
-    }
-    if (error.code === '23503') {
-      return res.status(400).json({ error: 'Título não encontrado' });
-    }
     next(error);
   }
 };
@@ -171,45 +98,24 @@ const updateIssue = async (req, res, next) => {
       pdf_file_url,
       page_count,
       author,
-      artist,
+      artist
     } = req.body;
 
-    const result = await pool.query(
-      `UPDATE issues 
-       SET title_id = COALESCE($1, title_id),
-           issue_number = COALESCE($2, issue_number),
-           publication_year = COALESCE($3, publication_year),
-           description = COALESCE($4, description),
-           cover_image_url = COALESCE($5, cover_image_url),
-           pdf_file_url = COALESCE($6, pdf_file_url),
-           page_count = COALESCE($7, page_count),
-           author = COALESCE($8, author),
-           artist = COALESCE($9, artist),
-           updated_at = NOW()
-       WHERE id = $10
-       RETURNING *`,
-      [
-        title_id,
-        issue_number,
-        publication_year,
-        description,
-        cover_image_url,
-        pdf_file_url,
-        page_count,
-        author,
-        artist,
-        id,
-      ]
-    );
+    const issueData = {};
+    if (title_id !== undefined) issueData.titleId = title_id;
+    if (issue_number !== undefined) issueData.issueNumber = issue_number;
+    if (publication_year !== undefined) issueData.publicationYear = publication_year;
+    if (description !== undefined) issueData.description = description;
+    if (cover_image_url !== undefined) issueData.coverImageUrl = cover_image_url;
+    if (pdf_file_url !== undefined) issueData.pdfFileUrl = pdf_file_url;
+    if (page_count !== undefined) issueData.pageCount = page_count;
+    if (author !== undefined) issueData.author = author;
+    if (artist !== undefined) issueData.artist = artist;
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Edição não encontrada' });
-    }
+    const issue = await IssueService.updateIssue(id, issueData);
 
-    res.json({
-      message: 'Edição atualizada com sucesso',
-      issue: result.rows[0],
-    });
+    const response = ResponseDTO.updated(issue, 'Edição atualizada com sucesso');
+    res.json(response);
   } catch (error) {
     next(error);
   }
@@ -222,13 +128,10 @@ const deleteIssue = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const result = await pool.query('DELETE FROM issues WHERE id = $1 RETURNING *', [id]);
+    const result = await IssueService.deleteIssue(id);
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Edição não encontrada' });
-    }
-
-    res.json({ message: 'Edição deletada com sucesso' });
+    const response = ResponseDTO.deleted(result.message);
+    res.json(response);
   } catch (error) {
     next(error);
   }
@@ -239,32 +142,12 @@ const deleteIssue = async (req, res, next) => {
  */
 const searchIssues = async (req, res, next) => {
   try {
-    const { q, limit = 20 } = req.query;
+    const { q, limit } = req.query;
 
-    if (!q) {
-      return res.status(400).json({ error: 'Parâmetro de busca "q" é obrigatório' });
-    }
+    const issues = await IssueService.searchIssues(q, limit);
 
-    const result = await pool.query(
-      `SELECT i.*, t.name as title_name, p.name as publisher_name,
-              COALESCE(AVG(r.value), 0) as average_rating
-       FROM issues i
-       JOIN titles t ON i.title_id = t.id
-       JOIN publishers p ON t.publisher_id = p.id
-       LEFT JOIN ratings r ON i.id = r.issue_id
-       WHERE 
-         t.name ILIKE $1 OR 
-         p.name ILIKE $1 OR 
-         i.description ILIKE $1 OR
-         i.author ILIKE $1 OR
-         i.artist ILIKE $1
-       GROUP BY i.id, t.name, p.name
-       ORDER BY i.publication_year DESC
-       LIMIT $2`,
-      [`%${q}%`, limit]
-    );
-
-    res.json({ issues: result.rows });
+    const response = ResponseDTO.list(issues);
+    res.json(response);
   } catch (error) {
     next(error);
   }
@@ -276,5 +159,5 @@ module.exports = {
   createIssue,
   updateIssue,
   deleteIssue,
-  searchIssues,
+  searchIssues
 };
