@@ -11,14 +11,18 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "dev:debug": "nodemon --inspect src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "test:watch": "echo \"Error: no test specified\" && exit 1",
-    "test:coverage": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --verbose",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:unit": "jest unit --verbose",
+    "test:integration": "jest integration --runInBand --verbose",
+    "test:e2e": "jest e2e --runInBand --verbose",
+    "test:ci": "jest --coverage --ci --runInBand --maxWorkers=2",
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint src/**/*.js --fix",
     "format": "prettier --write \"src/**/*.{js,json}\"",
     "format:check": "prettier --check \"src/**/*.{js,json}\"",
-    "validate": "npm run lint && npm run format:check",
+    "validate": "npm run lint && npm run format:check && npm run test",
     "db:init": "psql -U $DB_USER -d $DB_NAME -f database/init.sql",
     "db:seed": "node scripts/seed.js",
     "create-admin": "node scripts/create-admin.js",
@@ -50,11 +54,14 @@
     "xss": "^1.0.15"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10",
+    "@faker-js/faker": "^10.1.0",
     "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
     "husky": "^9.0.11",
-    "lint-staged": "^15.2.2"
+    "jest": "^30.2.0",
+    "lint-staged": "^15.2.2",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.2.5",
+    "supertest": "^7.1.4"
   },
   "lint-staged": {
     "*.js": [
