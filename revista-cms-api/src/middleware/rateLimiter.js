@@ -12,10 +12,6 @@ const authLimiter = rateLimit({
   },
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  // Usa IP + user-agent para identificar o cliente
-  keyGenerator: (req) => {
-    return req.ip + req.get('user-agent');
-  },
   // Pula rate limiting em ambiente de teste
   skip: (req) => process.env.NODE_ENV === 'test'
 });
