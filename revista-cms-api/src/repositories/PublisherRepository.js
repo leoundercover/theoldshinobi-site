@@ -108,7 +108,7 @@ class PublisherRepository {
     }
 
     // Sempre atualizar updated_at
-    updates.push(`updated_at = NOW()`);
+    updates.push('updated_at = NOW()');
 
     // Se não há campos para atualizar, retornar o registro atual
     if (values.length === 0) {

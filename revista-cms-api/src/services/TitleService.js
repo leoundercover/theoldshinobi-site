@@ -97,7 +97,7 @@ class TitleService {
       name: name.trim(),
       description: description?.trim(),
       coverImageUrl: coverImageUrl?.trim(),
-      genre: genre?.trim(),
+      genre: genre?.trim()
     });
 
     return title;
@@ -157,7 +157,7 @@ class TitleService {
       name: name?.trim(),
       description: description?.trim(),
       coverImageUrl: coverImageUrl?.trim(),
-      genre: genre?.trim(),
+      genre: genre?.trim()
     });
 
     return updated;

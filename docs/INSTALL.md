@@ -33,7 +33,7 @@ Sistema de Gerenciamento de Quadrinhos e Revistas
 ### Verificar Requisitos:
 
 ```bash
-./install.sh
+./scripts/install.sh
 # Selecione opção 4: "Apenas verificar requisitos"
 ```
 
@@ -57,8 +57,8 @@ git clone <seu-repositorio>
 cd theoldshinobi-site
 
 # 2. Execute o script de instalação
-chmod +x install.sh
-./install.sh
+chmod +x scripts/install.sh
+./scripts/install.sh
 
 # 3. Selecione opção 1: "Instalação completa"
 ```
@@ -73,7 +73,7 @@ O script irá:
 ### Método 2: Instalação Seletiva
 
 ```bash
-./install.sh
+./scripts/install.sh
 # Opção 2: Apenas Backend
 # Opção 3: Apenas Frontend
 ```

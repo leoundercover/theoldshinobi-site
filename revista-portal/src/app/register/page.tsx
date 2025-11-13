@@ -1,8 +1,7 @@
-'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -35,7 +34,7 @@ const registerSchema = z.object({
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const { setAuth } = useAuthStore();
   const [error, setError] = useState<string>('');
 
@@ -52,7 +51,7 @@ export default function RegisterPage() {
     onSuccess: (response) => {
       const { token, user } = response.data;
       setAuth(user, token);
-      router.push('/');
+      navigate('/');
     },
     onError: (err: AxiosError<ApiError>) => {
       const message = err.response?.data?.error || 'Erro ao criar conta. Tente novamente.';
@@ -150,7 +149,7 @@ export default function RegisterPage() {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Já tem uma conta?{' '}
-              <Link href="/login" className="text-primary hover:underline font-medium">
+              <Link to="/login" className="text-primary hover:underline font-medium">
                 Faça login
               </Link>
             </p>

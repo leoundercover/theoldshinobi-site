@@ -62,7 +62,7 @@ class PublisherService {
     const publisher = await PublisherRepository.create({
       name: name.trim(),
       description: description?.trim(),
-      logoUrl: logoUrl?.trim(),
+      logoUrl: logoUrl?.trim()
     });
 
     return publisher;
@@ -103,7 +103,7 @@ class PublisherService {
     const updated = await PublisherRepository.update(publisherId, {
       name: name?.trim(),
       description: description?.trim(),
-      logoUrl: logoUrl?.trim(),
+      logoUrl: logoUrl?.trim()
     });
 
     return updated;
@@ -163,7 +163,7 @@ class PublisherService {
     return {
       publisher_id: publisherId,
       name: publisher.name,
-      total_titles: titlesCount,
+      total_titles: titlesCount
     };
   }
 }

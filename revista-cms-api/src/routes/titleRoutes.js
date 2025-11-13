@@ -4,7 +4,7 @@ const {
   getTitleById,
   createTitle,
   updateTitle,
-  deleteTitle,
+  deleteTitle
 } = require('../controllers/titleController');
 const { authenticate, authorize } = require('../middleware/auth');
 

@@ -118,7 +118,7 @@ class TitleRepository {
       values.push(genre);
     }
 
-    updates.push(`updated_at = NOW()`);
+    updates.push('updated_at = NOW()');
 
     if (values.length === 0) {
       return this.findById(id);

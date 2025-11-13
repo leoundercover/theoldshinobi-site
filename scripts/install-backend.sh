@@ -47,139 +47,77 @@ if [ -f .env ]; then
     source .env 2>/dev/null || true
     
     echo -e "${YELLOW}⚠ Arquivo .env já existe${NC}"
-    echo ""
-    echo -e "${BLUE}Configuração atual:${NC}"
-    echo "  Host: $DB_HOST"
-    echo "  Database: $DB_NAME"
-    echo "  User: $DB_USER"
-    echo ""
-    echo "Opções:"
-    echo "1) Manter configuração atual"
-    echo "2) Atualizar apenas o Connection String"
-    echo "3) Reconfigurar tudo"
-    read -p "Escolha (1-3): " ENV_OPTION
-    
-    case $ENV_OPTION in
-        1)
-            echo -e "${GREEN}✓ Mantendo configuração existente${NC}"
-            echo ""
-            echo -e "${GREEN}✓ Backend configurado!${NC}"
-            exit 0
-            ;;
-        2)
-            echo ""
-            echo -e "${BLUE}📋 Configure seu banco Supabase:${NC}"
-            echo "1. Acesse https://app.supabase.com"
-            echo "2. Vá em Settings → Database"
-            echo "3. Copie a Connection String (modo Transaction)"
-            echo ""
-            echo -e "${YELLOW}Formato esperado:${NC}"
-            echo "postgresql://postgres:SENHA@db.SEU-PROJETO.supabase.co:5432/postgres"
-            echo ""
-            
-            # Loop até conseguir uma URL válida
-            while true; do
-                read -p "Cole a Connection String: " SUPABASE_URL
-                
-                # Validar e extrair informações da URL
-                if [[ $SUPABASE_URL =~ ^postgresql://([^:]+):([^@]+)@([^:]+):([^/]+)/([^?]+) ]]; then
-                    DB_USER="${BASH_REMATCH[1]}"
-                    DB_PASSWORD="${BASH_REMATCH[2]}"
-                    DB_HOST="${BASH_REMATCH[3]}"
-                    DB_PORT="${BASH_REMATCH[4]}"
-                    DB_NAME="${BASH_REMATCH[5]}"
-                    DB_SSL="true"
-                    
-                    # Manter JWT_SECRET existente
-                    JWT_SECRET=$JWT_SECRET
-                    
-                    echo -e "${GREEN}✓ Configuração Supabase extraída com sucesso${NC}"
-                    break
-                else
-                    echo -e "${RED}✗ URL inválida.${NC}"
-                    echo -e "${YELLOW}A Connection String deve começar com 'postgresql://'${NC}"
-                    echo -e "${YELLOW}Exemplo: postgresql://postgres:SENHA@db.PROJETO.supabase.co:5432/postgres${NC}"
-                    echo ""
-                fi
-            done
-            ;;
-        3)
-            # Continuar para reconfiguração completa
-            ;;
-        *)
-            echo -e "${RED}✗ Opção inválida${NC}"
-            exit 1
-            ;;
-    esac
+    read -p "Deseja sobrescrevê-lo? (s/N): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Ss]$ ]]; then
+        echo -e "${GREEN}✓ Mantendo configuração existente.${NC}"
+        exit 0
+    fi
 fi
 
-# Se não existe .env ou escolheu reconfigurar tudo
-if [ "$EXISTING_ENV" = false ] || [ "$ENV_OPTION" = "3" ]; then
-    # Gerar JWT_SECRET forte
-    echo -e "${BLUE}→ Gerando JWT_SECRET...${NC}"
-    JWT_SECRET=$(node -e "console.log(require('crypto').randomBytes(64).toString('hex'))")
-    
-    # Perguntar informações do banco
+# Gerar JWT_SECRET forte
+echo -e "${BLUE}→ Gerando JWT_SECRET...${NC}"
+JWT_SECRET=$(node -e "console.log(require('crypto').randomBytes(64).toString('hex'))")
+
+# Perguntar informações do banco
+echo ""
+echo -e "${BLUE}Configuração do Banco de Dados:${NC}"
+echo "-----------------------------------"
+echo "Você usará Supabase ou um PostgreSQL local?"
+echo "1) Supabase (recomendado)"
+echo "2) PostgreSQL local"
+read -p "Escolha (1 ou 2): " DB_CHOICE
+
+if [ "$DB_CHOICE" = "1" ]; then
     echo ""
-    echo -e "${BLUE}Configuração do Banco de Dados:${NC}"
-    echo "-----------------------------------"
-    echo "Você está usando Supabase ou PostgreSQL local?"
-    echo "1) Supabase (recomendado)"
-    echo "2) PostgreSQL local"
-    read -p "Escolha (1 ou 2): " DB_CHOICE
+    echo -e "${BLUE}📋 Configure seu banco Supabase:${NC}"
+    echo "1. Acesse https://app.supabase.com"
+    echo "2. Vá em Settings → Database"
+    echo "3. Copie a Connection String (modo Transaction)"
+    echo ""
+    echo -e "${YELLOW}Formato esperado:${NC}"
+    echo "postgresql://postgres:SENHA@db.SEU-PROJETO.supabase.co:5432/postgres"
+    echo ""
     
-    if [ "$DB_CHOICE" = "1" ]; then
-        echo ""
-        echo -e "${BLUE}📋 Configure seu banco Supabase:${NC}"
-        echo "1. Acesse https://app.supabase.com"
-        echo "2. Vá em Settings → Database"
-        echo "3. Copie a Connection String (modo Transaction)"
-        echo ""
-        echo -e "${YELLOW}Formato esperado:${NC}"
-        echo "postgresql://postgres:SENHA@db.SEU-PROJETO.supabase.co:5432/postgres"
-        echo ""
+    # Loop até conseguir uma URL válida
+    while true; do
+        read -p "Cole a Connection String: " SUPABASE_URL
         
-        # Loop até conseguir uma URL válida
-        while true; do
-            read -p "Cole a Connection String: " SUPABASE_URL
+        # Validar e extrair informações da URL
+        if [[ $SUPABASE_URL =~ ^postgresql://([^:]+):([^@]+)@([^:]+):([^/]+)/([^?]+) ]]; then
+            DB_USER="${BASH_REMATCH[1]}"
+            DB_PASSWORD="${BASH_REMATCH[2]}"
+            DB_HOST="${BASH_REMATCH[3]}"
+            DB_PORT="${BASH_REMATCH[4]}"
+            DB_NAME="${BASH_REMATCH[5]}"
+            DB_SSL="true"
             
-            # Extrair informações da URL
-            if [[ $SUPABASE_URL =~ ^postgresql://([^:]+):([^@]+)@([^:]+):([^/]+)/([^?]+) ]]; then
-                DB_USER="${BASH_REMATCH[1]}"
-                DB_PASSWORD="${BASH_REMATCH[2]}"
-                DB_HOST="${BASH_REMATCH[3]}"
-                DB_PORT="${BASH_REMATCH[4]}"
-                DB_NAME="${BASH_REMATCH[5]}"
-                DB_SSL="true"
-                
-                echo -e "${GREEN}✓ Configuração Supabase extraída com sucesso${NC}"
-                break
-            else
-                echo -e "${RED}✗ URL inválida.${NC}"
-                echo -e "${YELLOW}A Connection String deve começar com 'postgresql://'${NC}"
-                echo -e "${YELLOW}Exemplo: postgresql://postgres:SENHA@db.PROJETO.supabase.co:5432/postgres${NC}"
-                echo ""
-            fi
-        done
-    else
-        echo ""
-        read -p "Host do banco (localhost): " DB_HOST
-        DB_HOST=${DB_HOST:-localhost}
-        
-        read -p "Porta (5432): " DB_PORT
-        DB_PORT=${DB_PORT:-5432}
-        
-        read -p "Nome do banco (revista_cms): " DB_NAME
-        DB_NAME=${DB_NAME:-revista_cms}
-        
-        read -p "Usuário (postgres): " DB_USER
-        DB_USER=${DB_USER:-postgres}
-        
-        read -sp "Senha: " DB_PASSWORD
-        echo ""
-        
-        DB_SSL="false"
-    fi
+            echo -e "${GREEN}✓ Configuração Supabase extraída com sucesso${NC}"
+            break
+        else
+            echo -e "${RED}✗ URL inválida.${NC}"
+            echo -e "${YELLOW}A Connection String deve começar com 'postgresql://'${NC}"
+            echo ""
+        fi
+    done
+else
+    echo ""
+    read -p "Host do banco (localhost): " DB_HOST
+    DB_HOST=${DB_HOST:-localhost}
+    
+    read -p "Porta (5432): " DB_PORT
+    DB_PORT=${DB_PORT:-5432}
+    
+    read -p "Nome do banco (revista_cms): " DB_NAME
+    DB_NAME=${DB_NAME:-revista_cms}
+    
+    read -p "Usuário (postgres): " DB_USER
+    DB_USER=${DB_USER:-postgres}
+    
+    read -sp "Senha: " DB_PASSWORD
+    echo ""
+    
+    DB_SSL="false"
 fi
 
 # Criar arquivo .env
@@ -230,7 +168,8 @@ const pool = new Pool({
   database: process.env.DB_NAME,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+  connectionTimeoutMillis: 5000
 });
 
 pool.query('SELECT NOW()')
@@ -244,13 +183,13 @@ pool.query('SELECT NOW()')
     pool.end();
     process.exit(1);
   });
-" 2>/dev/null
+"
 
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✓ Banco de dados conectado!${NC}"
 else
     echo -e "${YELLOW}⚠ Não foi possível conectar ao banco${NC}"
-    echo -e "${YELLOW}→ Verifique as credenciais no arquivo .env${NC}"
+    echo -e "${YELLOW}→ Verifique as credenciais no arquivo .env e a conectividade de rede.${NC}"
 fi
 
 echo ""

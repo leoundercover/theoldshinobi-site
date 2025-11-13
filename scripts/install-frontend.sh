@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 
 echo ""
 echo "============================================"
-echo "🎨 Instalando Frontend (Next.js)"
+echo "🎨 Instalando Frontend (Vite + React)"
 echo "============================================"
 echo ""
 
@@ -42,7 +42,7 @@ echo -e "${BLUE}🔐 Configurando variáveis de ambiente...${NC}"
 
 if [ -f .env.local ]; then
     echo -e "${YELLOW}⚠ Arquivo .env.local já existe${NC}"
-    read -p "Deseja sobrescrever? (s/N): " -n 1 -r
+    read -p "Deseja sobrescrevê-lo? (s/N): " -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Ss]$ ]]; then
         echo -e "${YELLOW}→ Mantendo .env.local existente${NC}"
@@ -54,41 +54,19 @@ fi
 
 # Perguntar URL da API
 echo ""
-read -p "URL da API (http://localhost:3000): " API_URL
-API_URL=${API_URL:-http://localhost:3000}
+read -p "URL da API Backend (padrão: http://localhost:3000/api): " API_URL
+API_URL=${API_URL:-http://localhost:3000/api}
 
 # Criar arquivo .env.local
 cat > .env.local << EOF
 # URL da API Backend
-NEXT_PUBLIC_API_URL=$API_URL
+VITE_API_URL=$API_URL
 EOF
 
 echo ""
 echo -e "${GREEN}✓ Arquivo .env.local criado com sucesso!${NC}"
 echo ""
-
-# Testar se a API está acessível
-echo -e "${BLUE}🔍 Testando conexão com a API...${NC}"
-if command -v curl &> /dev/null; then
-    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" $API_URL/health 2>/dev/null || echo "000")
-
-    if [ "$HTTP_CODE" = "200" ]; then
-        echo -e "${GREEN}✓ API está acessível!${NC}"
-    else
-        echo -e "${YELLOW}⚠ API não está respondendo (código: $HTTP_CODE)${NC}"
-        echo -e "${YELLOW}→ Certifique-se de iniciar o backend antes do frontend${NC}"
-    fi
-else
-    echo -e "${YELLOW}⚠ curl não instalado, pulando teste de conexão${NC}"
-fi
-
-echo ""
 echo "============================================"
 echo -e "${GREEN}✓ Frontend instalado com sucesso!${NC}"
 echo "============================================"
-echo ""
-echo "Próximos passos:"
-echo "1. Certifique-se que o backend está rodando"
-echo "2. Inicie o servidor: cd revista-portal && npm run dev"
-echo "3. Acesse: http://localhost:3001"
 echo ""

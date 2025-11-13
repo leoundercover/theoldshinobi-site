@@ -1,14 +1,14 @@
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 
 export function useRequireAuth(requiredRole?: 'admin' | 'editor') {
-  const router = useRouter();
+  const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/login');
+      navigate('/login');
       return;
     }
 
@@ -24,9 +24,9 @@ export function useRequireAuth(requiredRole?: 'admin' | 'editor') {
       }
 
       // Se não tem permissão, redireciona
-      router.push('/');
+      navigate('/');
     }
-  }, [isAuthenticated, user, requiredRole, router]);
+  }, [isAuthenticated, user, requiredRole, navigate]);
 
   return { isAuthenticated, user };
 }

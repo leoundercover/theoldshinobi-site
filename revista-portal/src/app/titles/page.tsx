@@ -1,6 +1,5 @@
-'use client';
 
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { titlesApi } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
@@ -9,11 +8,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { LoadingPage } from '@/components/ui/loading';
 import { Alert } from '@/components/ui/alert';
 import { Plus, Book } from 'lucide-react';
+import { TitlesResponse } from "@/types";
+
 
 export default function TitlesPage() {
   const { user, isAuthenticated } = useAuthStore();
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<TitlesResponse>({
     queryKey: ['titles'],
     queryFn: async () => {
       const response = await titlesApi.getAll();
@@ -41,7 +42,7 @@ export default function TitlesPage() {
           <h1 className="text-3xl font-bold">Títulos</h1>
         </div>
         {isAuthenticated && (user?.role === 'admin' || user?.role === 'editor') && (
-          <Link href="/admin/titles/new">
+          <Link to="/admin/titles/new">
             <Button>
               <Plus className="h-4 w-4 mr-2" />
               Novo Título
@@ -59,7 +60,7 @@ export default function TitlesPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {data?.titles.map((title) => (
-            <Link key={title.id} href={`/titles/${title.id}`}>
+            <Link key={title.id} to={`/titles/${title.id}`}>
               <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
                 {title.cover_image_url && (
                   <CardContent className="pt-6">

@@ -58,7 +58,7 @@ const getUserFavorites = async (req, res, next) => {
 
     const result = await pool.query(
       `SELECT i.*, t.name as title_name, p.name as publisher_name,
-              COALESCE(AVG(r.value), 0) as average_rating
+              COALESCE(AVG(r.rating), 0) as average_rating
        FROM user_favorites uf
        JOIN issues i ON uf.issue_id = i.id
        JOIN titles t ON i.title_id = t.id
@@ -99,5 +99,5 @@ module.exports = {
   addFavorite,
   removeFavorite,
   getUserFavorites,
-  checkFavorite,
+  checkFavorite
 };

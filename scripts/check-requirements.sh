@@ -21,19 +21,6 @@ NC='\033[0m' # No Color
 ERRORS=0
 WARNINGS=0
 
-# Função para verificar comando
-check_command() {
-    if command -v $1 &> /dev/null; then
-        VERSION=$($2)
-        echo -e "${GREEN}✓${NC} $1 instalado: $VERSION"
-        return 0
-    else
-        echo -e "${RED}✗${NC} $1 não encontrado"
-        ERRORS=$((ERRORS + 1))
-        return 1
-    fi
-}
-
 # Função para verificar versão mínima do Node
 check_node_version() {
     if command -v node &> /dev/null; then
@@ -82,10 +69,10 @@ echo "🗄️ Verificando PostgreSQL:"
 echo "-----------------------------------"
 if command -v psql &> /dev/null; then
     PSQL_VERSION=$(psql --version)
-    echo -e "${GREEN}✓${NC} PostgreSQL instalado: $PSQL_VERSION"
+    echo -e "${GREEN}✓${NC} PostgreSQL Client (psql) instalado: $PSQL_VERSION"
 else
-    echo -e "${YELLOW}⚠${NC} PostgreSQL não encontrado localmente"
-    echo -e "  ${YELLOW}→${NC} Você pode usar Supabase (online) sem necessidade de instalação local"
+    echo -e "${YELLOW}⚠${NC} PostgreSQL Client (psql) não encontrado localmente"
+    echo -e "  ${YELLOW}→${NC} Isso não é um problema se você usar o Supabase (recomendado)."
     WARNINGS=$((WARNINGS + 1))
 fi
 echo ""
@@ -128,11 +115,7 @@ else
     echo -e "${RED}❌ Por favor, instale os requisitos faltantes antes de continuar.${NC}"
     echo ""
     echo "Instruções de instalação:"
-    echo ""
-    echo "Node.js e npm:"
-    echo "  Ubuntu/Debian: curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash - && sudo apt-get install -y nodejs"
-    echo "  macOS: brew install node"
-    echo "  Windows: https://nodejs.org/en/download/"
+    echo "  - Node.js (v18+): https://nodejs.org/"
     echo ""
     exit 1
 fi

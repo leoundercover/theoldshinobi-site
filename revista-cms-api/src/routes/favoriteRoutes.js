@@ -3,7 +3,7 @@ const {
   addFavorite,
   removeFavorite,
   getUserFavorites,
-  checkFavorite,
+  checkFavorite
 } = require('../controllers/favoriteController');
 const { authenticate } = require('../middleware/auth');
 

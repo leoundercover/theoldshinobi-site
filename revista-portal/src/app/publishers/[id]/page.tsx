@@ -1,7 +1,6 @@
-'use client';
 
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
+import { useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { publishersApi, titlesApi } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
@@ -10,13 +9,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { LoadingPage } from '@/components/ui/loading';
 import { Alert } from '@/components/ui/alert';
 import { ArrowLeft, Edit, Building2, Book } from 'lucide-react';
+import { Publisher, TitlesResponse } from "@/types";
+
 
 export default function PublisherDetailsPage() {
   const params = useParams();
   const publisherId = Number(params.id);
   const { user } = useAuthStore();
 
-  const { data: publisherData, isLoading: isLoadingPublisher, error: publisherError } = useQuery({
+  const { data: publisherData, isLoading: isLoadingPublisher, error: publisherError } = useQuery<{ publisher: Publisher }>({
     queryKey: ['publisher', publisherId],
     queryFn: async () => {
       const response = await publishersApi.getById(publisherId);
@@ -24,7 +25,7 @@ export default function PublisherDetailsPage() {
     },
   });
 
-  const { data: titlesData, isLoading: isLoadingTitles } = useQuery({
+  const { data: titlesData, isLoading: isLoadingTitles } = useQuery<TitlesResponse>({
     queryKey: ['titles', publisherId],
     queryFn: async () => {
       const response = await titlesApi.getAll(publisherId);
@@ -40,7 +41,7 @@ export default function PublisherDetailsPage() {
         <Alert variant="destructive">
           Editora não encontrada ou erro ao carregar.
         </Alert>
-        <Link href="/publishers">
+        <Link to="/publishers">
           <Button variant="outline" className="mt-4">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar
@@ -55,7 +56,7 @@ export default function PublisherDetailsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
-        <Link href="/publishers">
+        <Link to="/publishers">
           <Button variant="ghost" size="sm">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar para Editoras
@@ -73,7 +74,7 @@ export default function PublisherDetailsPage() {
                   <CardTitle className="text-3xl">{publisher?.name}</CardTitle>
                 </div>
                 {user?.role === 'admin' && (
-                  <Link href={`/admin/publishers/${publisherId}/edit`}>
+                  <Link to={`/admin/publishers/${publisherId}/edit`}>
                     <Button size="sm">
                       <Edit className="h-4 w-4 mr-2" />
                       Editar
@@ -135,7 +136,7 @@ export default function PublisherDetailsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {titlesData?.titles.map((title) => (
-              <Link key={title.id} href={`/titles/${title.id}`}>
+              <Link key={title.id} to={`/titles/${title.id}`}>
                 <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
                   <CardHeader>
                     <CardTitle>{title.name}</CardTitle>

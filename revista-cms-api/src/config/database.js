@@ -25,6 +25,9 @@ const pool = new Pool({
 
   // Statement timeout (previne queries longas)
   statement_timeout: 10000, // 10 segundos máximo por query
+
+  // Suporte IPv6 (Supabase usa IPv6)
+  options: '-c search_path=public'
 });
 
 // Log de conexão bem-sucedida
@@ -75,8 +78,13 @@ const closePool = async () => {
   }
 };
 
-// Executar teste de conexão ao inicializar
-testConnection();
+// Testar conexão de forma assíncrona (não bloqueia o startup)
+setImmediate(() => {
+  testConnection().catch(err => {
+    console.error('⚠️  Aviso: Falha no teste inicial de conexão com banco de dados');
+    console.error('   O servidor continuará rodando, mas as requisições ao banco podem falhar');
+  });
+});
 
 module.exports = pool;
 module.exports.testConnection = testConnection;

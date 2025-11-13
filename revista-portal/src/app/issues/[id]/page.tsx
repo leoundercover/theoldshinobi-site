@@ -1,8 +1,7 @@
-'use client';
 
 import { useState } from 'react';
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
+import { useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { issuesApi, ratingsApi, favoritesApi } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
@@ -14,6 +13,8 @@ import { Alert } from '@/components/ui/alert';
 import { ArrowLeft, Edit, Heart, Star, Send } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils';
 
+import { Issue, RatingsResponse, CommentsResponse, CheckFavoriteResponse } from "@/types";
+
 export default function IssueDetailsPage() {
   const params = useParams();
   const issueId = Number(params.id);
@@ -22,7 +23,7 @@ export default function IssueDetailsPage() {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
 
-  const { data: issueData, isLoading } = useQuery({
+  const { data: issueData, isLoading } = useQuery<{ issue: Issue }>({
     queryKey: ['issue', issueId],
     queryFn: async () => {
       const response = await issuesApi.getById(issueId);
@@ -30,7 +31,7 @@ export default function IssueDetailsPage() {
     },
   });
 
-  const { data: ratingsData } = useQuery({
+  const { data: ratingsData } = useQuery<RatingsResponse>({
     queryKey: ['ratings', issueId],
     queryFn: async () => {
       const response = await ratingsApi.getRatings(issueId);
@@ -38,7 +39,7 @@ export default function IssueDetailsPage() {
     },
   });
 
-  const { data: commentsData } = useQuery({
+  const { data: commentsData } = useQuery<CommentsResponse>({
     queryKey: ['comments', issueId],
     queryFn: async () => {
       const response = await ratingsApi.getComments(issueId);
@@ -46,7 +47,7 @@ export default function IssueDetailsPage() {
     },
   });
 
-  const { data: favoriteData } = useQuery({
+  const { data: favoriteData } = useQuery<CheckFavoriteResponse>({
     queryKey: ['favorite', issueId],
     queryFn: async () => {
       const response = await favoritesApi.check(issueId);
@@ -89,7 +90,7 @@ export default function IssueDetailsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
-        <Link href="/issues">
+        <Link to="/issues">
           <Button variant="ghost" size="sm">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar para Edições
@@ -111,7 +112,7 @@ export default function IssueDetailsPage() {
                   </CardDescription>
                 </div>
                 {user && (user.role === 'admin' || user.role === 'editor') && (
-                  <Link href={`/admin/issues/${issueId}/edit`}>
+                  <Link to={`/admin/issues/${issueId}/edit`}>
                     <Button size="sm">
                       <Edit className="h-4 w-4 mr-2" />
                       Editar

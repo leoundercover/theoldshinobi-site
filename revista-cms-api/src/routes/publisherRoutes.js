@@ -4,7 +4,7 @@ const {
   getPublisherById,
   createPublisher,
   updatePublisher,
-  deletePublisher,
+  deletePublisher
 } = require('../controllers/publisherController');
 const { authenticate, authorize } = require('../middleware/auth');
 

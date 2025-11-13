@@ -21,17 +21,17 @@ const rateIssue = async (req, res, next) => {
 
     // Tentar inserir ou atualizar a avaliação
     const result = await pool.query(
-      `INSERT INTO ratings (user_id, issue_id, value) 
+      `INSERT INTO ratings (user_id, issue_id, rating)
        VALUES ($1, $2, $3)
-       ON CONFLICT (user_id, issue_id) 
-       DO UPDATE SET value = $3, created_at = NOW()
+       ON CONFLICT (user_id, issue_id)
+       DO UPDATE SET rating = $3, created_at = NOW()
        RETURNING *`,
       [user_id, issue_id, value]
     );
 
     res.status(201).json({
       message: 'Avaliação registrada com sucesso',
-      rating: result.rows[0],
+      rating: result.rows[0]
     });
   } catch (error) {
     next(error);
@@ -86,7 +86,7 @@ const addComment = async (req, res, next) => {
 
     res.status(201).json({
       message: 'Comentário adicionado com sucesso',
-      comment: result.rows[0],
+      comment: result.rows[0]
     });
   } catch (error) {
     next(error);
@@ -128,7 +128,7 @@ const deleteComment = async (req, res, next) => {
 
     // Buscar o comentário
     const commentCheck = await pool.query('SELECT user_id FROM comments WHERE id = $1', [
-      comment_id,
+      comment_id
     ]);
 
     if (commentCheck.rows.length === 0) {
@@ -153,5 +153,5 @@ module.exports = {
   getIssueRatings,
   addComment,
   getIssueComments,
-  deleteComment,
+  deleteComment
 };

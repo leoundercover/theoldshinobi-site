@@ -2,9 +2,8 @@ import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
@@ -12,12 +11,13 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
         primary: {
-          DEFAULT: "#3B82F6",
+          DEFAULT: "#3B82F6", // Blue
           foreground: "#FFFFFF",
+          dark: "#2563EB",
         },
         secondary: {
-          DEFAULT: "#10B981",
-          foreground: "#FFFFFF",
+          DEFAULT: "#10B981", // Green
+          foreground: "#000000",
         },
         destructive: {
           DEFAULT: "#EF4444",
@@ -30,6 +30,10 @@ const config: Config = {
         accent: {
           DEFAULT: "#8B5CF6",
           foreground: "#FFFFFF",
+        },
+        card: {
+          DEFAULT: "#FFFFFF",
+          foreground: "#0F172A",
         },
         border: "#E5E7EB",
         input: "#E5E7EB",

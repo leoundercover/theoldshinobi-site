@@ -1,6 +1,5 @@
-'use client';
 
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { publishersApi, titlesApi, issuesApi } from '@/lib/api';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
@@ -88,13 +87,13 @@ export default function AdminDashboard() {
               <CardDescription>Gerenciar editoras do sistema</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Link href="/admin/publishers/new">
+              <Link to="/admin/publishers/new">
                 <Button className="w-full">
                   <Plus className="h-4 w-4 mr-2" />
                   Nova Editora
                 </Button>
               </Link>
-              <Link href="/publishers">
+              <Link to="/publishers">
                 <Button variant="outline" className="w-full">
                   Ver Todas
                 </Button>
@@ -109,13 +108,13 @@ export default function AdminDashboard() {
             <CardDescription>Gerenciar títulos de revistas</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Link href="/admin/titles/new">
+            <Link to="/admin/titles/new">
               <Button className="w-full">
                 <Plus className="h-4 w-4 mr-2" />
                 Novo Título
               </Button>
             </Link>
-            <Link href="/titles">
+            <Link to="/titles">
               <Button variant="outline" className="w-full">
                 Ver Todos
               </Button>
@@ -129,13 +128,13 @@ export default function AdminDashboard() {
             <CardDescription>Gerenciar edições publicadas</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Link href="/admin/issues/new">
+            <Link to="/admin/issues/new">
               <Button className="w-full">
                 <Plus className="h-4 w-4 mr-2" />
                 Nova Edição
               </Button>
             </Link>
-            <Link href="/issues">
+            <Link to="/issues">
               <Button variant="outline" className="w-full">
                 Ver Todas
               </Button>

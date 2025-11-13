@@ -36,12 +36,12 @@ const createPublisher = async (req, res, next) => {
     const publisher = await PublisherService.createPublisher({
       name,
       description,
-      logoUrl: logo_url,
+      logoUrl: logo_url
     });
 
     res.status(201).json({
       message: 'Editora criada com sucesso',
-      publisher,
+      publisher
     });
   } catch (error) {
     next(error);
@@ -59,12 +59,12 @@ const updatePublisher = async (req, res, next) => {
     const publisher = await PublisherService.updatePublisher(id, {
       name,
       description,
-      logoUrl: logo_url,
+      logoUrl: logo_url
     });
 
     res.json({
       message: 'Editora atualizada com sucesso',
-      publisher,
+      publisher
     });
   } catch (error) {
     next(error);
@@ -89,5 +89,5 @@ module.exports = {
   getPublisherById,
   createPublisher,
   updatePublisher,
-  deletePublisher,
+  deletePublisher
 };

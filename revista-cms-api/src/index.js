@@ -59,13 +59,14 @@ const PORT = process.env.PORT || 3000;
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", 'data:', 'https:'],
-    },
+      defaultSrc: ['\'self\''],
+      scriptSrc: ['\'self\''],
+      styleSrc: ['\'self\'', '\'unsafe-inline\'', 'fonts.googleapis.com'],
+      fontSrc: ['\'self\'', 'fonts.gstatic.com'],
+      imgSrc: ['\'self\'', 'data:', 'https:', 'blob:']
+    }
   },
-  crossOriginEmbedderPolicy: false, // Permite embeds de PDFs
+  crossOriginEmbedderPolicy: false
 }));
 
 // ========================================
@@ -78,13 +79,15 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 app.use(cors({
   origin: function (origin, callback) {
     // Permite requisições sem origin (mobile apps, Postman, etc.)
-    if (!origin) return callback(null, true);
+    if (!origin) {
+      return callback(null, true);
+    }
 
     if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
-      callback(null, true);
-    } else {
-      callback(new Error('Origem não permitida pelo CORS'));
+      return callback(null, true);
     }
+
+    return callback(new Error('Origem não permitida pelo CORS'));
   },
   credentials: true,
   optionsSuccessStatus: 200,
@@ -120,7 +123,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 // ========================================
 // HEALTH CHECK
 // ========================================
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.json({
     status: 'OK',
     message: 'API está funcionando',
@@ -187,7 +190,7 @@ const server = app.listen(PORT, () => {
   console.log(`📍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 URL: http://localhost:${PORT}`);
   console.log(`💚 Health check: http://localhost:${PORT}/health`);
-  console.log(`🔒 Segurança: Helmet ✓ | CORS ✓ | Rate Limit ✓`);
+  console.log('🔒 Segurança: Helmet ✓ | CORS ✓ | Rate Limit ✓');
   console.log('========================================');
 });
 

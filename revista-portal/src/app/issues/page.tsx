@@ -1,7 +1,6 @@
-'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { issuesApi } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
@@ -11,13 +10,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { LoadingPage } from '@/components/ui/loading';
 import { Alert } from '@/components/ui/alert';
 import { Plus, BookOpen, Search } from 'lucide-react';
+import { IssuesResponse } from "@/types";
+
 
 export default function IssuesPage() {
   const { user, isAuthenticated } = useAuthStore();
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<IssuesResponse>({
     queryKey: ['issues', page],
     queryFn: async () => {
       const response = await issuesApi.getAll({ page, limit: 12 });
@@ -65,7 +66,7 @@ export default function IssuesPage() {
             </Button>
           </form>
           {isAuthenticated && (user?.role === 'admin' || user?.role === 'editor') && (
-            <Link href="/admin/issues/new">
+            <Link to="/admin/issues/new">
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
                 Nova Edição
@@ -85,7 +86,7 @@ export default function IssuesPage() {
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {data?.data.map((issue) => (
-              <Link key={issue.id} href={`/issues/${issue.id}`}>
+              <Link key={issue.id} to={`/issues/${issue.id}`}>
                 <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
                   {issue.cover_image_url && (
                     <CardContent className="pt-6">

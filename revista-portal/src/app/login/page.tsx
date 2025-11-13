@@ -1,8 +1,7 @@
-'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -24,7 +23,7 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const { setAuth } = useAuthStore();
   const [error, setError] = useState<string>('');
 
@@ -41,7 +40,7 @@ export default function LoginPage() {
     onSuccess: (response) => {
       const { token, user } = response.data;
       setAuth(user, token);
-      router.push('/');
+      navigate('/');
     },
     onError: (err: AxiosError<ApiError>) => {
       const message = err.response?.data?.error || 'Erro ao fazer login. Tente novamente.';
@@ -114,7 +113,7 @@ export default function LoginPage() {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Não tem uma conta?{' '}
-              <Link href="/register" className="text-primary hover:underline font-medium">
+              <Link to="/register" className="text-primary hover:underline font-medium">
                 Registre-se
               </Link>
             </p>

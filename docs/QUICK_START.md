@@ -12,7 +12,7 @@ git clone <seu-repositorio>
 cd theoldshinobi-site
 
 # Execute o instalador
-./install.sh
+./scripts/install.sh
 # Escolha opção 1: "Instalação completa"
 ```
 

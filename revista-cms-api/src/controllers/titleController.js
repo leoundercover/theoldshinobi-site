@@ -71,7 +71,7 @@ const createTitle = async (req, res, next) => {
 
     res.status(201).json({
       message: 'Título criado com sucesso',
-      title: result.rows[0],
+      title: result.rows[0]
     });
   } catch (error) {
     if (error.code === '23503') {
@@ -109,7 +109,7 @@ const updateTitle = async (req, res, next) => {
 
     res.json({
       message: 'Título atualizado com sucesso',
-      title: result.rows[0],
+      title: result.rows[0]
     });
   } catch (error) {
     next(error);
@@ -140,5 +140,5 @@ module.exports = {
   getTitleById,
   createTitle,
   updateTitle,
-  deleteTitle,
+  deleteTitle
 };

@@ -10,7 +10,7 @@ class IssueRepository {
   async findById(id) {
     const result = await pool.query(
       `SELECT i.*, t.name as title_name, t.genre, p.name as publisher_name,
-              COALESCE(AVG(r.value), 0) as average_rating,
+              COALESCE(AVG(r.rating), 0) as average_rating,
               COUNT(DISTINCT r.id) as rating_count
        FROM issues i
        JOIN titles t ON i.title_id = t.id
@@ -32,7 +32,7 @@ class IssueRepository {
 
     let query = `
       SELECT i.*, t.name as title_name, p.name as publisher_name,
-             COALESCE(AVG(r.value), 0) as average_rating,
+             COALESCE(AVG(r.rating), 0) as average_rating,
              COUNT(DISTINCT r.id) as rating_count
       FROM issues i
       JOIN titles t ON i.title_id = t.id
@@ -112,7 +112,7 @@ class IssueRepository {
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
       [titleId, issueNumber, publicationYear, description, coverImageUrl,
-       pdfFileUrl, pageCount, author, artist]
+        pdfFileUrl, pageCount, author, artist]
     );
 
     return result.rows[0];
@@ -181,7 +181,7 @@ class IssueRepository {
   async findSimilar(issueId, limit = 4) {
     const result = await pool.query(
       `SELECT i.id, i.issue_number, i.cover_image_url, t.name as title_name,
-              COALESCE(AVG(r.value), 0) as average_rating
+              COALESCE(AVG(r.rating), 0) as average_rating
        FROM issues i
        JOIN titles t ON i.title_id = t.id
        LEFT JOIN ratings r ON i.id = r.issue_id
@@ -203,7 +203,7 @@ class IssueRepository {
   async search(searchTerm, limit = 20) {
     const result = await pool.query(
       `SELECT i.*, t.name as title_name, p.name as publisher_name,
-              COALESCE(AVG(r.value), 0) as average_rating
+              COALESCE(AVG(r.rating), 0) as average_rating
        FROM issues i
        JOIN titles t ON i.title_id = t.id
        JOIN publishers p ON t.publisher_id = p.id

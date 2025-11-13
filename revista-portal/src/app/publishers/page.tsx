@@ -1,6 +1,5 @@
-'use client';
 
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { publishersApi } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
@@ -42,7 +41,7 @@ export default function PublishersPage() {
           <h1 className="text-3xl font-bold">Editoras</h1>
         </div>
         {isAuthenticated && user?.role === 'admin' && (
-          <Link href="/admin/publishers/new">
+          <Link to="/admin/publishers/new">
             <Button>
               <Plus className="h-4 w-4 mr-2" />
               Nova Editora
@@ -60,7 +59,7 @@ export default function PublishersPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {data?.publishers.map((publisher) => (
-            <Link key={publisher.id} href={`/publishers/${publisher.id}`}>
+            <Link key={publisher.id} to={`/publishers/${publisher.id}`}>
               <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
                 <CardHeader>
                   <CardTitle>{publisher.name}</CardTitle>

@@ -1,6 +1,5 @@
-'use client';
 
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { favoritesApi } from '@/lib/api';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
@@ -10,11 +9,13 @@ import { LoadingPage } from '@/components/ui/loading';
 import { Alert } from '@/components/ui/alert';
 import { Heart, Trash2 } from 'lucide-react';
 
+import { FavoritesResponse } from "@/types";
+
 export default function FavoritesPage() {
   const { isAuthenticated } = useRequireAuth();
   const queryClient = useQueryClient();
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<FavoritesResponse>({
     queryKey: ['favorites'],
     queryFn: async () => {
       const response = await favoritesApi.getAll();
@@ -53,7 +54,7 @@ export default function FavoritesPage() {
         <Card>
           <CardContent className="pt-6 text-center text-gray-500">
             <p className="mb-4">Você ainda não adicionou nenhuma edição aos favoritos.</p>
-            <Link href="/issues">
+            <Link to="/issues">
               <Button>Explorar Edições</Button>
             </Link>
           </CardContent>
@@ -62,7 +63,7 @@ export default function FavoritesPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {data?.favorites.map((favorite) => (
             <Card key={favorite.issue_id} className="hover:shadow-lg transition-shadow">
-              <Link href={`/issues/${favorite.issue_id}`}>
+              <Link to={`/issues/${favorite.issue_id}`}>
                 {favorite.cover_image_url && (
                   <CardContent className="pt-6">
                     <img
@@ -74,7 +75,7 @@ export default function FavoritesPage() {
                 )}
               </Link>
               <CardHeader>
-                <Link href={`/issues/${favorite.issue_id}`}>
+                <Link to={`/issues/${favorite.issue_id}`}>
                   <CardTitle className="line-clamp-2 cursor-pointer hover:text-primary">
                     {favorite.title_name} #{favorite.issue_number}
                   </CardTitle>

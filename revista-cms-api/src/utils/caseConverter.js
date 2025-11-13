@@ -56,5 +56,5 @@ module.exports = {
   toSnakeCase,
   toCamelCase,
   objectToSnakeCase,
-  objectToCamelCase,
+  objectToCamelCase
 };

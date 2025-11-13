@@ -1,117 +1,120 @@
-'use client';
-
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
-import { BookOpen, Heart, LogOut, User, LayoutDashboard } from 'lucide-react';
+import { BookOpen, Search, User, LogOut } from 'lucide-react';
 
 export function Navbar() {
-  const pathname = usePathname();
-  const router = useRouter();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuthStore();
 
   const handleLogout = () => {
     logout();
-    router.push('/login');
+    navigate('/login');
   };
 
-  const isActive = (path: string) => pathname === path;
+  const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path);
+  const activeFilter = new URLSearchParams(location.search).get('filter');
 
   return (
-    <nav className="bg-white border-b shadow-sm sticky top-0 z-50">
+    <nav className="bg-white border-b sticky top-0 z-50">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-14">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <BookOpen className="h-8 w-8 text-primary" />
-            <span className="text-xl font-bold text-gray-900">
+          <Link to="/" className="flex items-center space-x-2 text-gray-900 hover:opacity-80 transition-opacity">
+            <BookOpen className="h-6 w-6 text-primary" />
+            <span className="text-lg font-bold tracking-wider">
               Revista Portal
             </span>
           </Link>
 
           {/* Navigation Links */}
-          <div className="hidden md:flex items-center space-x-6">
+          <div className="hidden md:flex items-center space-x-1">
             <Link
-              href="/publishers"
-              className={`hover:text-primary transition-colors ${
-                isActive('/publishers') ? 'text-primary font-medium' : 'text-gray-600'
+              to="/"
+              className={`px-4 py-2 text-sm font-medium uppercase tracking-wide rounded-md transition-colors ${
+                location.pathname === '/'
+                  ? 'text-primary bg-blue-50'
+                  : 'text-gray-700 hover:text-primary hover:bg-gray-50'
               }`}
             >
-              Editoras
+              Início
             </Link>
             <Link
-              href="/titles"
-              className={`hover:text-primary transition-colors ${
-                isActive('/titles') ? 'text-primary font-medium' : 'text-gray-600'
+              to="/publishers?filter=marvel"
+              className={`px-4 py-2 text-sm font-medium uppercase tracking-wide rounded-md transition-colors ${
+                activeFilter === 'marvel'
+                  ? 'text-primary bg-blue-50'
+                  : 'text-gray-700 hover:text-primary hover:bg-gray-50'
               }`}
             >
-              Títulos
+              Marvel Comics
             </Link>
             <Link
-              href="/issues"
-              className={`hover:text-primary transition-colors ${
-                isActive('/issues') ? 'text-primary font-medium' : 'text-gray-600'
+              to="/publishers?filter=dc"
+              className={`px-4 py-2 text-sm font-medium uppercase tracking-wide rounded-md transition-colors ${
+                activeFilter === 'dc'
+                  ? 'text-primary bg-blue-50'
+                  : 'text-gray-700 hover:text-primary hover:bg-gray-50'
               }`}
             >
-              Edições
+              DC Comics
             </Link>
-
-            {isAuthenticated && (
-              <>
-                <Link
-                  href="/favorites"
-                  className={`hover:text-primary transition-colors flex items-center space-x-1 ${
-                    isActive('/favorites') ? 'text-primary font-medium' : 'text-gray-600'
-                  }`}
-                >
-                  <Heart className="h-4 w-4" />
-                  <span>Favoritos</span>
-                </Link>
-
-                {(user?.role === 'admin' || user?.role === 'editor') && (
-                  <Link
-                    href="/admin"
-                    className={`hover:text-primary transition-colors flex items-center space-x-1 ${
-                      pathname.startsWith('/admin') ? 'text-primary font-medium' : 'text-gray-600'
-                    }`}
-                  >
-                    <LayoutDashboard className="h-4 w-4" />
-                    <span>Admin</span>
-                  </Link>
-                )}
-              </>
-            )}
+            <Link
+              to="/publishers?filter=image"
+              className={`px-4 py-2 text-sm font-medium uppercase tracking-wide rounded-md transition-colors ${
+                activeFilter === 'image'
+                  ? 'text-primary bg-blue-50'
+                  : 'text-gray-700 hover:text-primary hover:bg-gray-50'
+              }`}
+            >
+              Image Comics
+            </Link>
+            <Link
+              to="/issues"
+              className={`px-4 py-2 text-sm font-medium uppercase tracking-wide rounded-md transition-colors flex items-center space-x-1 ${
+                isActive('/issues')
+                  ? 'text-primary bg-blue-50'
+                  : 'text-gray-700 hover:text-primary hover:bg-gray-50'
+              }`}
+            >
+              <Search className="h-4 w-4" />
+              <span>Buscar</span>
+            </Link>
           </div>
 
           {/* Auth Section */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
             {isAuthenticated ? (
               <>
-                <Link href="/profile">
-                  <Button variant="ghost" size="sm" className="flex items-center space-x-2">
-                    <User className="h-4 w-4" />
-                    <span>{user?.name}</span>
+                <Link to="/profile">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  >
+                    <User className="h-4 w-4 mr-1" />
+                    {user?.name}
                   </Button>
                 </Link>
-                <Button variant="outline" size="sm" onClick={handleLogout}>
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Sair
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                >
+                  <LogOut className="h-4 w-4" />
                 </Button>
               </>
             ) : (
-              <>
-                <Link href="/login">
-                  <Button variant="ghost" size="sm">
-                    Entrar
-                  </Button>
-                </Link>
-                <Link href="/register">
-                  <Button size="sm">
-                    Registrar
-                  </Button>
-                </Link>
-              </>
+              <Link to="/login">
+                <Button
+                  size="sm"
+                  className="font-bold uppercase tracking-wide"
+                >
+                  Entrar
+                </Button>
+              </Link>
             )}
           </div>
         </div>

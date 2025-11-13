@@ -5,7 +5,7 @@ const {
   createIssue,
   updateIssue,
   deleteIssue,
-  searchIssues,
+  searchIssues
 } = require('../controllers/issueController');
 const { authenticate, authorize } = require('../middleware/auth');
 

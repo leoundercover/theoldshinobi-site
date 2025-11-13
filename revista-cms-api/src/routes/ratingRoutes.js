@@ -4,7 +4,7 @@ const {
   getIssueRatings,
   addComment,
   getIssueComments,
-  deleteComment,
+  deleteComment
 } = require('../controllers/ratingController');
 const { authenticate } = require('../middleware/auth');
 
