@@ -17,14 +17,14 @@ export function Navbar() {
   const activeFilter = new URLSearchParams(location.search).get('filter');
 
   return (
-    <nav className="bg-white border-b sticky top-0 z-50">
+    <nav className="sticky top-0 z-50 bg-zinc-900 border-b border-zinc-800 text-zinc-100">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-14">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 text-gray-900 hover:opacity-80 transition-opacity">
-            <BookOpen className="h-6 w-6 text-primary" />
+          <Link to="/" className="flex items-center space-x-2 text-zinc-100 hover:opacity-80 transition-opacity">
+            <BookOpen className="h-6 w-6 text-red-500" />
             <span className="text-lg font-bold tracking-wider">
-              Revista Portal
+              The Old Shinobi
             </span>
           </Link>
 
@@ -34,8 +34,8 @@ export function Navbar() {
               to="/"
               className={`px-4 py-2 text-sm font-medium uppercase tracking-wide rounded-md transition-colors ${
                 location.pathname === '/'
-                  ? 'text-primary bg-blue-50'
-                  : 'text-gray-700 hover:text-primary hover:bg-gray-50'
+                  ? 'text-red-400 bg-zinc-800'
+                  : 'text-zinc-300 hover:text-white hover:bg-zinc-800'
               }`}
             >
               Início
@@ -44,8 +44,8 @@ export function Navbar() {
               to="/publishers?filter=marvel"
               className={`px-4 py-2 text-sm font-medium uppercase tracking-wide rounded-md transition-colors ${
                 activeFilter === 'marvel'
-                  ? 'text-primary bg-blue-50'
-                  : 'text-gray-700 hover:text-primary hover:bg-gray-50'
+                  ? 'text-red-400 bg-zinc-800'
+                  : 'text-zinc-300 hover:text-white hover:bg-zinc-800'
               }`}
             >
               Marvel Comics
@@ -54,8 +54,8 @@ export function Navbar() {
               to="/publishers?filter=dc"
               className={`px-4 py-2 text-sm font-medium uppercase tracking-wide rounded-md transition-colors ${
                 activeFilter === 'dc'
-                  ? 'text-primary bg-blue-50'
-                  : 'text-gray-700 hover:text-primary hover:bg-gray-50'
+                  ? 'text-red-400 bg-zinc-800'
+                  : 'text-zinc-300 hover:text-white hover:bg-zinc-800'
               }`}
             >
               DC Comics
@@ -64,8 +64,8 @@ export function Navbar() {
               to="/publishers?filter=image"
               className={`px-4 py-2 text-sm font-medium uppercase tracking-wide rounded-md transition-colors ${
                 activeFilter === 'image'
-                  ? 'text-primary bg-blue-50'
-                  : 'text-gray-700 hover:text-primary hover:bg-gray-50'
+                  ? 'text-red-400 bg-zinc-800'
+                  : 'text-zinc-300 hover:text-white hover:bg-zinc-800'
               }`}
             >
               Image Comics
@@ -74,8 +74,8 @@ export function Navbar() {
               to="/issues"
               className={`px-4 py-2 text-sm font-medium uppercase tracking-wide rounded-md transition-colors flex items-center space-x-1 ${
                 isActive('/issues')
-                  ? 'text-primary bg-blue-50'
-                  : 'text-gray-700 hover:text-primary hover:bg-gray-50'
+                  ? 'text-red-400 bg-zinc-800'
+                  : 'text-zinc-300 hover:text-white hover:bg-zinc-800'
               }`}
             >
               <Search className="h-4 w-4" />
@@ -91,7 +91,7 @@ export function Navbar() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                    className="text-zinc-300 hover:bg-zinc-800 hover:text-white"
                   >
                     <User className="h-4 w-4 mr-1" />
                     {user?.name}
@@ -101,7 +101,7 @@ export function Navbar() {
                   variant="ghost"
                   size="sm"
                   onClick={handleLogout}
-                  className="text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  className="text-zinc-300 hover:bg-zinc-800 hover:text-white"
                 >
                   <LogOut className="h-4 w-4" />
                 </Button>

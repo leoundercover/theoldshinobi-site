@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { issuesApi } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,13 @@ import { IssuesResponse } from "@/types";
 export default function IssuesPage() {
   const { user, isAuthenticated } = useAuthStore();
   const [page, setPage] = useState(1);
+  const queryClient = useQueryClient();
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => issuesApi.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['issues'] }),
+  });
+
   const [searchTerm, setSearchTerm] = useState('');
 
   const { data, isLoading, error } = useQuery<IssuesResponse>({
@@ -44,6 +51,9 @@ export default function IssuesPage() {
       </div>
     );
   }
+
+  // Support both old (snake_case + meta) and new DTO (camelCase + pagination)
+  const pagination: any = (data as any)?.pagination || (data as any)?.meta;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -86,48 +96,71 @@ export default function IssuesPage() {
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {data?.data.map((issue) => (
-              <Link key={issue.id} to={`/issues/${issue.id}`}>
-                <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-                  {issue.cover_image_url && (
-                    <CardContent className="pt-6">
-                      <img
-                        src={issue.cover_image_url}
-                        alt={`${issue.title_name} #${issue.issue_number}`}
-                        className="w-full h-64 object-cover rounded"
-                      />
-                    </CardContent>
+              <div key={issue.id} className="flex flex-col">
+                <Link to={`/issues/${issue.id}`}>
+                  <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+                    {(issue.coverImageUrl || issue.cover_image_url) && (
+                      <CardContent className="pt-6">
+                        <img
+                          src={issue.coverImageUrl || issue.cover_image_url}
+                          alt={`${issue.title?.name || issue.title_name} #${issue.issueNumber || issue.issue_number}`}
+                          className="w-full h-64 object-cover rounded"
+                        />
+                      </CardContent>
+                    )}
+                    <CardHeader>
+                      <CardTitle className="line-clamp-2">
+                        {(issue.title?.name || issue.title_name)} #{issue.issueNumber || issue.issue_number}
+                      </CardTitle>
+                      <CardDescription>
+                        {(issue.publisher?.name || issue.publisher_name)} • {(issue.publicationYear || issue.publication_year)}
+                        {((issue.rating?.average ?? issue.average_rating) > 0) && (
+                          <span className="ml-2">⭐ {Number(issue.rating?.average ?? issue.average_rating).toFixed(1)}</span>
+                        )}
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                </Link>
+                <div className="mt-2 flex gap-2">
+                  {isAuthenticated && (user?.role === 'admin' || user?.role === 'editor') && (
+                    <Link to={`/admin/issues/${issue.id}/edit`}>
+                      <Button variant="outline" size="sm">Editar</Button>
+                    </Link>
                   )}
-                  <CardHeader>
-                    <CardTitle className="line-clamp-2">
-                      {issue.title_name} #{issue.issue_number}
-                    </CardTitle>
-                    <CardDescription>
-                      {issue.publisher_name} • {issue.publication_year}
-                      {issue.average_rating && issue.average_rating > 0 && (
-                        <span className="ml-2">⭐ {Number(issue.average_rating).toFixed(1)}</span>
-                      )}
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              </Link>
+                  {isAuthenticated && user?.role === 'admin' && (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => {
+                        if (confirm('Tem certeza que deseja excluir esta edição?')) {
+                          deleteMutation.mutate(issue.id);
+                        }
+                      }}
+                      disabled={deleteMutation.isPending}
+                    >
+                      Excluir
+                    </Button>
+                  )}
+                </div>
+              </div>
             ))}
           </div>
 
-          {data && data.meta.totalPages > 1 && (
+          {pagination && pagination.totalPages > 1 && (
             <div className="flex justify-center items-center space-x-2 mt-8">
               <Button
                 variant="outline"
-                disabled={!data.meta.hasPrevPage}
+                disabled={!pagination.hasPrevPage}
                 onClick={() => setPage(page - 1)}
               >
                 Anterior
               </Button>
               <span className="text-sm text-gray-600">
-                Página {data.meta.page} de {data.meta.totalPages}
+                Página {pagination.page} de {pagination.totalPages}
               </span>
               <Button
                 variant="outline"
-                disabled={!data.meta.hasNextPage}
+                disabled={!pagination.hasNextPage}
                 onClick={() => setPage(page + 1)}
               >
                 Próxima

@@ -1,7 +1,7 @@
 
 import { useParams } from 'react-router-dom';
-import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { Link, useNavigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { publishersApi, titlesApi } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,16 @@ export default function PublisherDetailsPage() {
   const params = useParams();
   const publisherId = Number(params.id);
   const { user } = useAuthStore();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  const deleteMutation = useMutation({
+    mutationFn: () => publishersApi.delete(publisherId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['publishers'] });
+      navigate('/publishers');
+    },
+  });
 
   const { data: publisherData, isLoading: isLoadingPublisher, error: publisherError } = useQuery<{ publisher: Publisher }>({
     queryKey: ['publisher', publisherId],
@@ -74,12 +84,26 @@ export default function PublisherDetailsPage() {
                   <CardTitle className="text-3xl">{publisher?.name}</CardTitle>
                 </div>
                 {user?.role === 'admin' && (
-                  <Link to={`/admin/publishers/${publisherId}/edit`}>
-                    <Button size="sm">
-                      <Edit className="h-4 w-4 mr-2" />
-                      Editar
+                  <div className="flex gap-2">
+                    <Link to={`/admin/publishers/${publisherId}/edit`}>
+                      <Button size="sm">
+                        <Edit className="h-4 w-4 mr-2" />
+                        Editar
+                      </Button>
+                    </Link>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => {
+                        if (confirm('Tem certeza que deseja excluir esta editora?')) {
+                          deleteMutation.mutate();
+                        }
+                      }}
+                      disabled={deleteMutation.isPending}
+                    >
+                      Excluir
                     </Button>
-                  </Link>
+                  </div>
                 )}
               </div>
               {publisher?.description && (

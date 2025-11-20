@@ -73,13 +73,35 @@ export default function AdminDashboard() {
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{issuesData?.meta.total || 0}</div>
+            <div className="text-2xl font-bold">{issuesData?.pagination?.total || issuesData?.meta?.total || 0}</div>
             <p className="text-xs text-muted-foreground">Total cadastradas</p>
           </CardContent>
         </Card>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {user.role === 'admin' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Usuários</CardTitle>
+              <CardDescription>Gerenciar usuários e permissões</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Link to="/admin/users/new">
+                <Button className="w-full">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Novo Usuário
+                </Button>
+              </Link>
+              <Link to="/admin/users">
+                <Button variant="outline" className="w-full">
+                  Ver Todos
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
+
         {user.role === 'admin' && (
           <Card>
             <CardHeader>

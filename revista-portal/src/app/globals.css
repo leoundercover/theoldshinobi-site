@@ -2,20 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Revista Portal - Light Theme */
+/* The Old Shinobi - Dark Theme */
 :root {
-  --background: #ffffff;
-  --foreground: #0f172a; /* slate-900 */
-  --primary: #3B82F6;    /* blue-500 */
-  --primary-dark: #2563EB; /* blue-600 */
-  --card-bg: #ffffff;
-  --border: #E5E7EB;     /* gray-200 */
+  --background: #0a0a0a; /* near-black */
+  --foreground: #f4f4f5; /* zinc-100 */
+  --primary: #ef4444;    /* red-500 */
+  --primary-dark: #dc2626; /* red-600 */
+  --card-bg: #111827;    /* gray-900 */
+  --border: #27272a;     /* zinc-800 */
+}
+
+html, body, #root {
+  height: 100%;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
 }
 
+::selection {
+  background: var(--primary);
+  color: #fff;
+}
 

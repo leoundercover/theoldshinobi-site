@@ -113,15 +113,18 @@ export const issuesApi = {
   getById: (id: number) => api.get(`/issues/${id}`),
 
   search: (term: string, limit?: number) =>
-    api.get('/issues/search', { params: { term, limit } }),
+    api.get('/issues/search', { params: { q: term, limit } }),
 
   create: (data: {
     title_id: number;
     issue_number: number;
     publication_year: number;
     cover_image_url?: string;
-    pdf_url?: string;
+    pdf_file_url?: string;
     description?: string;
+    page_count?: number;
+    author?: string;
+    artist?: string;
   }) => api.post('/issues', data),
 
   update: (id: number, data: {
@@ -129,8 +132,11 @@ export const issuesApi = {
     issue_number?: number;
     publication_year?: number;
     cover_image_url?: string;
-    pdf_url?: string;
+    pdf_file_url?: string;
     description?: string;
+    page_count?: number;
+    author?: string;
+    artist?: string;
   }) => api.put(`/issues/${id}`, data),
 
   delete: (id: number) => api.delete(`/issues/${id}`),
@@ -151,7 +157,7 @@ export const ratingsApi = {
     api.get(`/issues/${issue_id}/comments`, { params }),
 
   deleteComment: (comment_id: number) =>
-    api.delete(`/comments/${comment_id}`),
+    api.delete(`/issues/comments/${comment_id}`),
 };
 
 // Favorites API
@@ -163,4 +169,19 @@ export const favoritesApi = {
   remove: (issue_id: number) => api.delete(`/favorites/${issue_id}`),
 
   check: (issue_id: number) => api.get(`/favorites/${issue_id}/check`),
+};
+
+
+// Users API (admin)
+export const usersApi = {
+  getAll: (params?: { page?: number; limit?: number }) =>
+    api.get('/users', { params }),
+  getById: (id: number) => api.get(`/users/${id}`),
+  create: (data: { name: string; email: string; password: string; role: 'admin' | 'editor' | 'reader' }) =>
+    api.post('/users', data),
+  update: (
+    id: number,
+    data: { name?: string; email?: string; password?: string; role?: 'admin' | 'editor' | 'reader' }
+  ) => api.put(`/users/${id}`, data),
+  delete: (id: number) => api.delete(`/users/${id}`),
 };

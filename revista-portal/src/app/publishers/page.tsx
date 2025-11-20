@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { publishersApi } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,13 @@ import { PublishersResponse } from '@/types';
 
 export default function PublishersPage() {
   const { user, isAuthenticated } = useAuthStore();
+
+  const queryClient = useQueryClient();
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => publishersApi.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['publishers'] }),
+  });
 
   const { data, isLoading, error } = useQuery<PublishersResponse>({
     queryKey: ['publishers'],
@@ -59,27 +66,48 @@ export default function PublishersPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {data?.publishers.map((publisher) => (
-            <Link key={publisher.id} to={`/publishers/${publisher.id}`}>
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-                <CardHeader>
-                  <CardTitle>{publisher.name}</CardTitle>
-                  {publisher.description && (
-                    <CardDescription className="line-clamp-3">
-                      {publisher.description}
-                    </CardDescription>
+            <div key={publisher.id} className="flex flex-col">
+              <Link to={`/publishers/${publisher.id}`}>
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+                  <CardHeader>
+                    <CardTitle>{publisher.name}</CardTitle>
+                    {publisher.description && (
+                      <CardDescription className="line-clamp-3">
+                        {publisher.description}
+                      </CardDescription>
+                    )}
+                  </CardHeader>
+                  {publisher.logo_url && (
+                    <CardContent>
+                      <img
+                        src={publisher.logo_url}
+                        alt={publisher.name}
+                        className="w-full h-32 object-contain"
+                      />
+                    </CardContent>
                   )}
-                </CardHeader>
-                {publisher.logo_url && (
-                  <CardContent>
-                    <img
-                      src={publisher.logo_url}
-                      alt={publisher.name}
-                      className="w-full h-32 object-contain"
-                    />
-                  </CardContent>
-                )}
-              </Card>
-            </Link>
+                </Card>
+              </Link>
+              {isAuthenticated && user?.role === 'admin' && (
+                <div className="mt-2 flex gap-2">
+                  <Link to={`/admin/publishers/${publisher.id}/edit`}>
+                    <Button variant="outline" size="sm">Editar</Button>
+                  </Link>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => {
+                      if (confirm('Tem certeza que deseja excluir esta editora?')) {
+                        deleteMutation.mutate(publisher.id);
+                      }
+                    }}
+                    disabled={deleteMutation.isPending}
+                  >
+                    Excluir
+                  </Button>
+                </div>
+              )}
+            </div>
           ))}
         </div>
       )}

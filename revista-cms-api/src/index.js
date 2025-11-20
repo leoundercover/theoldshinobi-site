@@ -49,6 +49,7 @@ const titleRoutes = require('./routes/titleRoutes');
 const issueRoutes = require('./routes/issueRoutes');
 const ratingRoutes = require('./routes/ratingRoutes');
 const favoriteRoutes = require('./routes/favoriteRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -140,6 +141,7 @@ app.use('/api/publishers', publisherRoutes);
 app.use('/api/titles', titleRoutes);
 app.use('/api/issues', issueRoutes);
 app.use('/api/issues', ratingRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/favorites', favoriteRoutes);
 
 // ========================================

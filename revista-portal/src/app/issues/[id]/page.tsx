@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { issuesApi, ratingsApi, favoritesApi } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingPage } from '@/components/ui/loading';
 import { Alert } from '@/components/ui/alert';
-import { ArrowLeft, Edit, Heart, Star, Send } from 'lucide-react';
+import { ArrowLeft, Edit, Heart, Star, Send, BookOpen } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils';
 
 import { Issue, RatingsResponse, CommentsResponse, CheckFavoriteResponse } from "@/types";
@@ -23,12 +23,13 @@ export default function IssueDetailsPage() {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
 
-  const { data: issueData, isLoading } = useQuery<{ issue: Issue }>({
+  const { data: issueData, isLoading } = useQuery<any>({
     queryKey: ['issue', issueId],
     queryFn: async () => {
       const response = await issuesApi.getById(issueId);
       return response.data;
     },
+    select: (res: any) => res.data,
   });
 
   const { data: ratingsData } = useQuery<RatingsResponse>({
@@ -83,6 +84,15 @@ export default function IssueDetailsPage() {
     },
   });
 
+  const navigate = useNavigate();
+  const deleteMutation = useMutation({
+    mutationFn: () => issuesApi.delete(issueId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['issues'] });
+      navigate('/issues');
+    },
+  });
+
   if (isLoading) return <LoadingPage />;
 
   const issue = issueData?.issue;
@@ -105,27 +115,43 @@ export default function IssueDetailsPage() {
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle className="text-3xl">
-                    {issue?.title_name} #{issue?.issue_number}
+                    {issue?.title?.name ?? issue?.title_name} #{issue?.issueNumber ?? issue?.issue_number}
                   </CardTitle>
                   <CardDescription className="text-lg mt-2">
-                    {issue?.publisher_name} • {issue?.publication_year}
+                    {issue?.publisher?.name ?? issue?.publisher_name} • {issue?.publicationYear ?? issue?.publication_year}
                   </CardDescription>
                 </div>
-                {user && (user.role === 'admin' || user.role === 'editor') && (
-                  <Link to={`/admin/issues/${issueId}/edit`}>
-                    <Button size="sm">
-                      <Edit className="h-4 w-4 mr-2" />
-                      Editar
+                <div className="flex gap-2">
+                  {user && (user.role === 'admin' || user.role === 'editor') && (
+                    <Link to={`/admin/issues/${issueId}/edit`}>
+                      <Button size="sm">
+                        <Edit className="h-4 w-4 mr-2" />
+                        Editar
+                      </Button>
+                    </Link>
+                  )}
+                  {user?.role === 'admin' && (
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => {
+                        if (confirm('Tem certeza que deseja excluir esta edição?')) {
+                          deleteMutation.mutate();
+                        }
+                      }}
+                      disabled={deleteMutation.isPending}
+                    >
+                      Excluir
                     </Button>
-                  </Link>
-                )}
+                  )}
+                </div>
               </div>
             </CardHeader>
-            {issue?.cover_image_url && (
+            {(issue?.coverImageUrl || issue?.cover_image_url) && (
               <CardContent>
                 <img
-                  src={issue.cover_image_url}
-                  alt={`${issue.title_name} #${issue.issue_number}`}
+                  src={issue.coverImageUrl || issue.cover_image_url}
+                  alt={`${issue?.title?.name ?? issue?.title_name} #${issue?.issueNumber ?? issue?.issue_number}`}
                   className="w-full max-w-md mx-auto rounded-lg shadow-lg"
                 />
               </CardContent>
@@ -133,6 +159,16 @@ export default function IssueDetailsPage() {
             {issue?.description && (
               <CardContent>
                 <p className="text-gray-700">{issue.description}</p>
+              </CardContent>
+            )}
+            {(issue?.pdfFileUrl || issue?.pdf_file_url) && (
+              <CardContent>
+                <Link to={`/issues/${issueId}/read`}>
+                  <Button variant="secondary">
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    Ler
+                  </Button>
+                </Link>
               </CardContent>
             )}
           </Card>
@@ -187,17 +223,17 @@ export default function IssueDetailsPage() {
               <CardTitle>Avaliação</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {issue?.average_rating && issue.average_rating > 0 && (
+              {issue?.rating?.average && issue.rating.average > 0 && (
                 <div className="text-center">
                   <div className="text-4xl font-bold text-primary">
-                    {Number(issue.average_rating).toFixed(1)}
+                    {Number(issue.rating.average).toFixed(1)}
                   </div>
                   <div className="flex justify-center mt-2">
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
                         className={`h-5 w-5 ${
-                          i < Math.round(issue.average_rating!)
+                          i < Math.round(issue.rating!.average!)
                             ? 'fill-yellow-400 text-yellow-400'
                             : 'text-gray-300'
                         }`}

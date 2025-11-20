@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { titlesApi } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,13 @@ import { TitlesResponse } from "@/types";
 
 export default function TitlesPage() {
   const { user, isAuthenticated } = useAuthStore();
+
+  const queryClient = useQueryClient();
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => titlesApi.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['titles'] }),
+  });
 
   const { data, isLoading, error } = useQuery<TitlesResponse>({
     queryKey: ['titles'],
@@ -60,26 +67,49 @@ export default function TitlesPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {data?.titles.map((title) => (
-            <Link key={title.id} to={`/titles/${title.id}`}>
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-                {title.cover_image_url && (
-                  <CardContent className="pt-6">
-                    <img
-                      src={title.cover_image_url}
-                      alt={title.name}
-                      className="w-full h-48 object-cover rounded"
-                    />
-                  </CardContent>
+            <div key={title.id} className="flex flex-col">
+              <Link to={`/titles/${title.id}`}>
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+                  {title.cover_image_url && (
+                    <CardContent className="pt-6">
+                      <img
+                        src={title.cover_image_url}
+                        alt={title.name}
+                        className="w-full h-48 object-cover rounded"
+                      />
+                    </CardContent>
+                  )}
+                  <CardHeader>
+                    <CardTitle className="line-clamp-2">{title.name}</CardTitle>
+                    <CardDescription>
+                      {title.publisher_name}
+                      {title.genre && ` • ${title.genre}`}
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
+              <div className="mt-2 flex gap-2">
+                {isAuthenticated && (user?.role === 'admin' || user?.role === 'editor') && (
+                  <Link to={`/admin/titles/${title.id}/edit`}>
+                    <Button variant="outline" size="sm">Editar</Button>
+                  </Link>
                 )}
-                <CardHeader>
-                  <CardTitle className="line-clamp-2">{title.name}</CardTitle>
-                  <CardDescription>
-                    {title.publisher_name}
-                    {title.genre && ` • ${title.genre}`}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </Link>
+                {isAuthenticated && user?.role === 'admin' && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => {
+                      if (confirm('Tem certeza que deseja excluir este título?')) {
+                        deleteMutation.mutate(title.id);
+                      }
+                    }}
+                    disabled={deleteMutation.isPending}
+                  >
+                    Excluir
+                  </Button>
+                )}
+              </div>
+            </div>
           ))}
         </div>
       )}
